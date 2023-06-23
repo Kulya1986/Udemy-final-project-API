@@ -1,81 +1,52 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
 import cors from 'cors';
+import knex from 'knex';
+import handleRegister from './controllers/register.js';
+import handleSignin from './controllers/signin.js';
+import handleProfileRequest from './controllers/profile.js';
+import {handleApiCall, handleImageDetect} from './controllers/imageCheck.js';
+
+const db = knex({
+    client: 'pg',
+    connection: {
+        host : '127.0.0.1',
+        // port : 5432,
+        user : 'postgres',
+        password : 'Kulya86',
+        database : 'brain-db'
+  }
+})
+
+
+// db.select('*').from('users')
+//     .then(response =>{
+//     console.log(response);
+// });
 
 const app = express();
 app.use(express.json()); //middleware to parse JSON format of the frontend, from latest versions built-in the express library, no need to import bodyParser library
 app.use(cors());
 
-const database = {
-    users: [
-        {
-            id:"123",
-            name: "john",
-            email: "john123@gmail.com",
-            password: "cookies",
-            entries: 0,
-            joined: new Date()
-        },
-        {
-            id:"456",
-            name: "sally",
-            email: "sally456@gmail.com",
-            password: "cakes",
-            entries: 0,
-            joined: new Date()
-        }
-    ]
-}
+app.get('/',(req, res) =>{ res.json(db.users)})
+    // db.select('*').from('users').then(data => {
+    //     res.json(data);
+    // }).catch(err => {
+    //     res.status(400).json('failed to load users')
+    // })
+    
 
-app.get('/',(req, res) =>{
-    res.send(database.users);
-})
 
-app.post('/signin', (req, res) => {
-    if (req.body.email === database.users[0].email &&
-        req.body.password === database.users[0].password){
-            res.json(database.users[0]);
-        }
-    else res.status(400).json('Error log in')
-})
+app.post('/signin', (req, res) => {handleSignin(req, res, db, bcrypt)}) //1st way of syntax
 
-app.post('/register', (req, res) =>{
-   const {email, name, password} = req.body;
-    database.users.push({
-        id:"128",
-        name: name,
-        email: email,
-        // password: password,
-        entries: 0,
-        joined: new Date()
-   })
-   res.json(database.users[database.users.length-1]);
-})
+app.post('/register', handleRegister(db, bcrypt)) //2nd way of syntax
 
-app.get('/profile/:id', (req, res) =>{
-    const {id} = req.params;
-    const found = database.users.filter(user=>{
-        return user.id === id;
-    })
-    if (found.length>0) res.json(found);
-    else res.status(400).json('user not found');
-})
+app.post('/imageurl', (req, res) => {handleApiCall(req, res)})
 
-app.put('/image', (req, res) =>{
-    const {id} = req.body;
-    let found = false;
-    database.users.forEach(user =>{
-        if (user.id === id) {
-            found = true;
-            user.entries++;
-            return res.json(user.entries);
-        }
-    })
-    if (!found) res.status(400).json('user not found');
-})
+app.get('/profile/:id', handleProfileRequest(db))
+
+app.put('/image', handleImageDetect(db))
 
 app.listen(3000, ()=>{
     console.log('App is running on port 3000');
 })
-
-
