@@ -1,7 +1,7 @@
 
 import { ClarifaiStub, grpc } from 'clarifai-nodejs-grpc';
 
-const PAT = '67332b3a08994dd28b520e626670f4df';
+const PAT = process.env.CLARIFAI_API;
 const USER_ID = "kulya1986";       
 const APP_ID = "facefinder";
 // const MODEL_ID = "face-detection";
