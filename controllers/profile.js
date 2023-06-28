@@ -8,7 +8,7 @@ const handleProfileRequest = (db) => (req, res) => {
             else {
                 res.status(400).json('user not found');
             }
-         }).catch(err => res.status(400).json('user not found'))   
+         }).catch(err => res.status(400).json('something went wrong when retrieving user'))   
 }
 
 export default handleProfileRequest;
