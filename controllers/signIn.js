@@ -21,7 +21,7 @@ const handleSignin = (req, res, db, bcrypt) => {
                 }       
             });
         }).catch(err => {
-            res.status(400).json('no user with such credentials')
+            res.status(400).json('Something went wrong when retrieving user')
         })
 }
 
